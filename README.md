@@ -1,3 +1,7 @@
+## What is this
+
+This is a simple helper for me to download translations from Lokalise.
+
 ## How to use
 
 ```typescript
