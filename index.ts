@@ -1,6 +1,6 @@
 import { LokaliseApi } from '@lokalise/node-api';
 import axios from 'axios';
-import { createWriteStream, mkdirSync, unlinkSync, writeFileSync } from 'fs';
+import fs from 'fs';
 import path from 'path';
 import yauzl from 'yauzl';
 
@@ -19,6 +19,10 @@ export default async function fetchLokalise({
     throw new Error('Params not provided');
   }
 
+  if (fs.existsSync(outDir) === false) {
+    fs.mkdirSync(outDir);
+  }
+
   const bundleStructure = '%LANG_ISO%.%FORMAT%';
   const zipFilePath = path.resolve(outDir, 'files.zip');
   const targetPath = outDir;
@@ -32,6 +36,7 @@ export default async function fetchLokalise({
       format: 'json',
       original_filenames: false,
       bundle_structure: bundleStructure,
+      all_platforms: true,
       // filter_langs,
     }
   );
@@ -42,8 +47,8 @@ export default async function fetchLokalise({
     responseType: 'arraybuffer',
   });
 
-  writeFileSync(zipFilePath, data);
-  mkdirSync(targetPath, { recursive: true });
+  fs.writeFileSync(zipFilePath, data);
+  fs.mkdirSync(targetPath, { recursive: true });
 
   await new Promise((resolve) => {
     yauzl.open(zipFilePath, (error, zipFile) => {
@@ -70,7 +75,7 @@ export default async function fetchLokalise({
           }
 
           stream.pipe(
-            createWriteStream(path.resolve(targetPath, entry.fileName))
+            fs.createWriteStream(path.resolve(targetPath, entry.fileName))
           );
         });
       });
@@ -79,6 +84,6 @@ export default async function fetchLokalise({
     });
   });
 
-  unlinkSync(zipFilePath);
+  fs.unlinkSync(zipFilePath);
   console.log('done.');
 }
