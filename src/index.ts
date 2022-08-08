@@ -55,7 +55,9 @@ export default async function fetchLokalise({
   );
   while (page < pageCount) {
     page += 1;
-    tasks.push(limiter.schedule(() => listKeys({ projectId, token, page })));
+    tasks.push(
+      limiter.schedule(() => listKeys({ projectId, token, page, tags })),
+    );
   }
   const keysToPageCountTuples = await Promise.all(tasks);
   keysToPageCountTuples.forEach(([newKeys]) => {
