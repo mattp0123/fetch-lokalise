@@ -1,0 +1,14 @@
+[
+  {
+    "_id": "3a60b0c2-f825-4e06-8b07-db6c8d7fcedf",
+    "colName": "Lokalise API",
+    "created": "2022-08-08T03:46:47.891Z",
+    "sortNum": 10000,
+    "folders": [],
+    "settings": {
+      "headers": [],
+      "tests": [],
+      "envId": "532b93a1-a188-4852-947f-c3428b3a034a"
+    }
+  }
+]

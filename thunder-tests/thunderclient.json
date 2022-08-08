@@ -1,0 +1,47 @@
+[
+  {
+    "_id": "ba401d61-a2dd-4e75-a7be-7d9c14dce1c8",
+    "colId": "3a60b0c2-f825-4e06-8b07-db6c8d7fcedf",
+    "containerId": "",
+    "name": "Get Keys",
+    "url": "https://api.lokalise.com/api2/projects/{projectId}/keys?limit=100&filter_tags=webapp&page=2&include_translations=1",
+    "method": "GET",
+    "sortNum": 10000,
+    "created": "2022-08-08T03:46:47.893Z",
+    "modified": "2022-08-08T03:50:21.940Z",
+    "headers": [
+      {
+        "name": "X-API-Token",
+        "value": "{{LOKALISE_API_TOKEN}}"
+      }
+    ],
+    "params": [
+      {
+        "name": "projectId",
+        "value": "767843275ba9f350c076a6.64337909",
+        "isPath": true
+      },
+      {
+        "name": "limit",
+        "value": "100",
+        "isPath": false
+      },
+      {
+        "name": "filter_tags",
+        "value": "webapp",
+        "isPath": false
+      },
+      {
+        "name": "page",
+        "value": "2",
+        "isPath": false
+      },
+      {
+        "name": "include_translations",
+        "value": "1",
+        "isPath": false
+      }
+    ],
+    "tests": []
+  }
+]
