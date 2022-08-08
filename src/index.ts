@@ -1,36 +1,13 @@
-import axios from 'axios';
-import Bottleneck from 'bottleneck';
+import got from 'got';
 import fs from 'node:fs';
 import path from 'node:path';
-import type { Key, LangToTranslationsMap, ListKeysResponse } from './types';
+import type { LangToTranslationsMap, ListKeysResponse } from './types';
 
 interface Params {
   projectId: string;
   token: string;
   outDir: string;
   tags?: string[];
-}
-
-async function listKeys({
-  projectId,
-  token,
-  page,
-  tags,
-}: Omit<Params, 'outDir'> & { page: number }) {
-  const { data, headers } = await axios.get<ListKeysResponse>(
-    `https://api.lokalise.com/api2/projects/${projectId}/keys`,
-    {
-      headers: { 'x-api-token': token },
-      params: {
-        page,
-        limit: 100,
-        include_translations: '1',
-        ...(tags && { filter_tags: tags.join(',') }),
-      },
-    },
-  );
-  const pageCount = parseInt(headers['x-pagination-page-count']);
-  return [data.keys, pageCount] as const;
 }
 
 export default async function fetchLokalise({
@@ -46,23 +23,34 @@ export default async function fetchLokalise({
   fs.rmSync(outDir, { recursive: true, force: true });
   fs.mkdirSync(outDir);
 
-  // Rate limit: 6 reqs/sec
-  const limiter = new Bottleneck({ minTime: 167 });
-  const tasks: Promise<readonly [Key[], number]>[] = [];
-  let page = 1;
-  let [keys, pageCount] = await limiter.schedule(() =>
-    listKeys({ projectId, token, tags, page }),
+  const keys = await got.paginate.all(
+    `https://api.lokalise.com/api2/projects/${projectId}/keys`,
+    {
+      headers: { 'x-api-token': token },
+      searchParams: {
+        page: 1,
+        limit: 50,
+        include_translations: '1',
+        ...(tags && { filter_tags: tags.join(',') }),
+      },
+      pagination: {
+        transform: (res) =>
+          (JSON.parse(res.body as string) as ListKeysResponse).keys,
+        // Rate limit: 6 reqs/sec
+        backoff: 167,
+        paginate: ({ response }) => {
+          const currentPage = parseInt(
+            response.requestUrl.searchParams.get('page')!,
+          );
+          const pageCount = parseInt(
+            response.headers['x-pagination-page-count'] as string,
+          );
+          const hasNextPage = currentPage < pageCount;
+          return hasNextPage && { searchParams: { page: currentPage + 1 } };
+        },
+      },
+    },
   );
-  while (page < pageCount) {
-    page += 1;
-    tasks.push(
-      limiter.schedule(() => listKeys({ projectId, token, page, tags })),
-    );
-  }
-  const keysToPageCountTuples = await Promise.all(tasks);
-  keysToPageCountTuples.forEach(([newKeys]) => {
-    keys = keys.concat(newKeys);
-  });
   const flattendKeys = keys.flatMap(({ key_name, translations }) => {
     const { web: keyName } = key_name;
     return translations.map(({ translation, language_iso }) => ({
