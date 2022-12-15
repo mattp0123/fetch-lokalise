@@ -2,11 +2,11 @@
   "compilerOptions": {
     "strict": true,
     "declaration": true,
-    "declarationDir": "dist/types",
+    "outDir": "dist",
     "esModuleInterop": true,
     "target": "ES2021",
-    "module": "ESNext",
-    "moduleResolution": "Node",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "sourceMap": true,
   },
   "include": ["src/*.ts"]

@@ -1,7 +1,7 @@
 import got from 'got';
 import fs from 'node:fs';
 import path from 'node:path';
-import type { LangToTranslationsMap, ListKeysResponse } from './types';
+import type { LangToTranslationsMap, ListKeysResponse } from './types.js';
 
 interface Params {
   projectId: string;
